@@ -139,9 +139,6 @@ func main() {
 	topic := strings.TrimPrefix(u.Path, "/")
 	u.Path = ""
 
-	opts := mqtt.NewClientOptions()
-	opts.SetClientID(*id)
-	opts.SetWill(path.Join(topic, "online"), "false", 1, true)
 	var hosts []string
 	if u.Host != "" {
 		hosts, err = resolveLookup(u.Host)
@@ -155,6 +152,9 @@ func main() {
 		}
 	}
 
+	opts := mqtt.NewClientOptions()
+	opts.SetClientID(*id)
+	opts.SetWill(path.Join(topic, "online"), "false", 1, true)
 	for _, u.Host = range hosts {
 		log.Println("Adding broker:", u.String())
 		opts.AddBroker(u.String())

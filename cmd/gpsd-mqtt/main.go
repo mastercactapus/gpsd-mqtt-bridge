@@ -30,7 +30,8 @@ func resolveMDNS(host string) ([]net.IP, error) {
 	defer uConn.Close()
 
 	msg := new(dns.Msg)
-	msg.SetQuestion(dns.Fqdn(host), dns.TypeA)
+	name := dns.Fqdn(host)
+	msg.SetQuestion(name, dns.TypeA)
 	data, err := msg.Pack()
 	if err != nil {
 		return nil, err
@@ -53,9 +54,15 @@ func resolveMDNS(host string) ([]net.IP, error) {
 
 	var result []net.IP
 	for _, r := range msg.Answer {
-		if a, ok := r.(*dns.A); ok {
-			result = append(result, a.A)
+		a, ok := r.(*dns.A)
+		if !ok {
+			continue
 		}
+		if a.Hdr.Name != name {
+			continue
+		}
+
+		result = append(result, a.A)
 	}
 
 	return result, nil
